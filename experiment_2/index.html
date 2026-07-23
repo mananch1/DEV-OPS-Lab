@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Cat Pic Website</title>
+	</head>
+        <body>
+    <h1>Random Cat Generator</h1>
+
+    <button onclick="fetchCat()">Get a Cat Pic</button>
+
+    <div id="cat-container">
+        <p>Click the button to load a cat!</p>
+    </div>
+
+    <script>
+        async function fetchCat() {
+            const container = document.getElementById("cat-container");
+            container.innerHTML = "<p>Loading...</p>";
+
+            try {
+                // Fetch a random cat image
+                const response = await fetch("https://api.thecatapi.com/v1/images/search");
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch cat image.");
+                }
+
+                const data = await response.json();
+
+                // Display the image
+                container.innerHTML = `
+                    <img
+                        src="${data[0].url}"
+                        alt="A cute cat"
+                        style="max-width:100%; height:auto; margin-top:15px; border-radius:8px;"
+                    >
+                `;
+            } catch (error) {
+                console.error("Error fetching cat:", error);
+                container.innerHTML = "<p>Failed to load image. Please try again!</p>";
+            }
+        }
+    </script>
+</body>
+
+</html>
