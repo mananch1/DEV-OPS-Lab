@@ -1,0 +1,10 @@
+plugins { id 'java' }
+group='com.vit.demo'
+version='1.0.0'
+repositories{ mavenCentral() }
+tasks.register('runTest', JavaExec){
+ classpath=sourceSets.test.runtimeClasspath
+ mainClass='com.vit.demo.AppTest'
+}
+test.dependsOn runTest
+jar{ archiveBaseName='ci-jenkins-demo' }
