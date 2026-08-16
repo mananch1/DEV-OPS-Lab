@@ -1,0 +1,77 @@
+pipeline{
+    agent any
+    tools{
+        jdk 'Java_21'
+        maven 'Maven'
+    }
+    stages{
+        stage('Checkout'){
+            steps{
+                echo 'downloading the git project'
+                git branch: 'main',
+                    url: "https://github.com/mananch1/DEV-OPS-Lab.git"
+            }
+        }
+        stage('Compile'){
+            steps{
+                echo 'Compiling the program'
+                dir('experiment_4'){
+                    bat 'mvn clean compile'
+                }
+            }
+        }
+        stage('Test'){
+            steps{
+                echo 'Executing Junit Tests'
+                dir('experiment_4'){
+                    bat 'mvn test'
+                }
+            }
+        }
+        stage('Package'){
+            steps{
+                echo 'Packaging the built program'
+                dir('experiment_4'){
+                    bat 'mvn package -DskipTests'
+                    archiveArtifacts artifacts:"target/*.war",
+                                     fingerprint:true
+                }
+            }
+        }
+        stage('Deploy'){
+            steps{
+                echo 'Deploying the project'
+                dir('experiment_4'){
+                    bat '''
+                        copy /Y target\\jenkins-demo.war ^
+                        "D:\\DOCS\\apache-tomcat-9.0.120\\webapps\\jenkins-demo.war"
+                    '''
+                }
+            }
+        }
+
+        stage('Verify'){
+            steps{
+                echo 'Verifying the deployed app'
+                bat '''
+                    curl --fail ^
+                    http://localhost:8080/jenkins-demo/
+                '''
+            }
+        }
+    }
+    post{
+        always{
+            dir('experiment_4'){
+                junit allowEmptyResults:true,
+                      testResults: "target/surefire-reports/*.xml"
+            }
+        }
+        success{
+            echo "CI/CD pipeline successfull"
+        }
+        failure{
+            echo 'CI/CD Pipeline filed'
+        }
+    }
+}
